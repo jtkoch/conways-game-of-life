@@ -3,9 +3,9 @@ import styled from 'styled-components'
 
 const GridContainer = styled.div`
     display: grid;
-    grid-gap: 2px;
+    grid-gap: 1px;
     grid-template-columns: ${({ numColumns }) => (`repeat(${numColumns}, 20px)`)};
-    padding: 0 12px 12px;
+    padding: 1%;
 `
 
 const GridCell = styled.div`
@@ -13,9 +13,9 @@ const GridCell = styled.div`
     grid-row-start: auto;
     border: 1px solid black;
     cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background-color: ${({ isAlive }) => (isAlive ? 'salmon' : 'transparent')};
+    width: 18px;
+    height: 18px;
+    background-color: ${({ isAlive }) => (isAlive ? '#00c9c3' : '#474747')};
 `
 
 const Grid = ({ grid, onClick }) => {

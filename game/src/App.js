@@ -1,9 +1,35 @@
 import React, { useState, useRef, useCallback } from 'react'
 import Grid from './components/Grid'
-import './App.css'
+import styled from 'styled-components'
 
-const startingRows = 30
-const startingColumns = 100
+const Generation = styled.div`
+  padding: 5%;
+`
+const Controls = styled.div`
+  padding: 0%;
+`
+const Buttons = styled.button`
+  padding: 1%;
+  margin: 2%;
+  width: 60%;
+  background-color: teal;
+  box-shadow: 2px 2px black;
+  border-radius: 8px;
+  font-family: 'Mulish', sans-serif;
+  cursor: pointer;
+`
+const MainContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Mulish', sans-serif;
+`
+
+
+const startingRows = 68
+const startingColumns = 35
 const gridDirections = [
     [0, 1],   // right
     [0, -1],  // left
@@ -50,9 +76,9 @@ const cellNeighbors = (grid, i, j) => {
 
 
 function App() {
-  const [grid, setGrid] = useState(() => {
+  const [grid, setGrid] = useState(() => 
     emptyGrid(startingRows, startingColumns)
-  })
+  )
 
   const [generation, setGeneration] = useState(0)
   const [running, setRunning] = useState(false)
@@ -103,30 +129,30 @@ function App() {
         return newGrid;
       });
   
-      setTimeout(runSimulation, 500);
+      setTimeout(runSimulation, 10);
     }, []);
 
 
   return (
-    <div>
-      <div className="generation">
-        Generation : {generation}
-      </div>
-      <div className="buttons">
-        <button onClick={onStartHandler}>{`${running ? 'Stop' : 'Start'}`}</button>
-        <button onClick={() => {
+    <MainContainer>
+      <Controls>
+        <Generation>
+          Generation: {generation}
+        </Generation>
+        <Buttons onClick={onStartHandler}>{`${running ? 'Stop' : 'Start'}`}</Buttons>
+        <Buttons onClick={() => {
           setRunning(false)
           setGrid(emptyGrid(startingRows, startingColumns))
           setGeneration(0)
-        }}>Clear Grid</button>
-        <button onClick={() => setGrid(randomGrid(startingRows, startingColumns))}>
+        }}>Clear Grid</Buttons>
+        <Buttons onClick={() => setGrid(randomGrid(startingRows, startingColumns))}>
           Random Grid
-        </button>
+        </Buttons>
+      </Controls>
+      <div>
+        <Grid grid={grid} setGrid={setGrid} onClick={onClickCellHandler} />
       </div>
-      <div className="grid">
-        <Grid grid={grid} onClick={onClickCellHandler} />
-      </div>
-    </div>
+    </MainContainer>
   )
 }
 
