@@ -1,28 +1,29 @@
 import React, { useState, useRef, useCallback } from 'react'
+import produce from 'immer'
 import Grid from './components/Grid'
+import About from './components/About'
 import styled from 'styled-components'
 
-const Generation = styled.div`
-  padding: 5%;
+import Button from 'react-bootstrap/Button'
+
+const Title = styled.div`
+  padding: 1%;
 `
-const Controls = styled.div`
+const Generation = styled.div`
   padding: 0%;
 `
-const Buttons = styled.button`
+const Controls = styled.nav`
   padding: 1%;
-  margin: 2%;
-  width: 60%;
-  background-color: teal;
-  box-shadow: 2px 2px black;
-  border-radius: 8px;
-  font-family: 'Mulish', sans-serif;
-  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
 `
+
 const MainContainer = styled.div`
   display: flex;
   flex-direction: column;
   text-align: center;
-  justify-content: center;
+  justify-content: space-;
   align-items: center;
   font-family: 'Mulish', sans-serif;
 `
@@ -49,108 +50,122 @@ const emptyGrid = (numRows, numColumns) => {
     return rows
 }
 
-const randomGrid = (numRows, numColumns) => {
-  const rows = []
-  for (let i = 0; i < numRows; i += 1) {
-    rows.push(
-      Array.from(Array(numColumns), () => (Math.random() > 0.6 ? 1 : 0))
-    )
-  }
-  return rows
-}
-
-const cellNeighbors = (grid, i, j) => {
-  const numRows = grid.length
-  const numColumns = numRows ? grid[0].length : 0
-  let neighbors = 0
-
-  gridDirections.forEach(([x, y]) => {
-    const rowBorder = i + x
-    const columnBorder = j + y
-    if (rowBorder >= 0 && rowBorder < numRows && columnBorder >= 0 && columnBorder < numColumns) {
-      neighbors += grid[rowBorder][columnBorder]
-    }
-  })
-  return neighbors
-}
-
-
 function App() {
   const [grid, setGrid] = useState(() => 
     emptyGrid(startingRows, startingColumns)
   )
-
   const [generation, setGeneration] = useState(0)
   const [running, setRunning] = useState(false)
-  
-  const generationRef = useRef(generation)
-  generationRef.current = generation
-  
+  const [speed, setSpeed] = useState(10)
+
+  // This gives the current value of the running state while being mutable
   const runningRef = useRef(running)
-  runningRef.current = running // updates the current value on every render
+  runningRef.current = running 
 
-  const onClickCellHandler = (rowIndex, columnIndex) => {
-    setGrid(prevGrid => {
-      const newGrid = [...prevGrid]
-      newGrid[rowIndex][columnIndex] = prevGrid[rowIndex][columnIndex] ? 0 : 1
-      return newGrid
-    })
-  }
+  const speedRef = useRef(speed)
+  speedRef.current = speed
 
-  const onStartHandler = () => {
-    setRunning(!running)
-
-    if (!running) {
-      runningRef.current = true
-      runSimulation()
+    const handleClick = (i, j) => {
+      let gridCopy = produce(grid, gridCopy => {
+        gridCopy[i][j] ? gridCopy[i][j] = 0 : gridCopy[i][j] = 1
+      })
+      setGrid(gridCopy)
     }
-  }
 
     const runSimulation = useCallback(() => {
-      if (!runningRef.current) {
-        return
-      }
+      if (!runningRef.current) return
 
-      setGrid(prevGrid => {
-        const newGrid = prevGrid.map(rows => rows.slice(0));
-        
-        for (let i = 0; i < startingRows; i += 1) {
-          for (let j = 0; j < startingColumns; j += 1) {
-            const neighbors = cellNeighbors(prevGrid, i, j);
-            
-            if (neighbors < 2 || neighbors > 3) { // cell dies
-              newGrid[i][j] = 0;
-            } else if (newGrid[i][j] === 0 && neighbors === 3) { // cell lives
-              newGrid[i][j] = 1;
+      setGrid(grid => {
+        return produce(grid, (newGrid) => {
+
+          let count = 0
+
+          for (let i = 0; i < startingRows; i += 1) {
+            for (let j = 0; j < startingColumns; j += 1) {
+              
+              if (grid[i][j]) {
+                count += 1
+              }
+
+              let neighbors = 0
+
+              gridDirections.forEach(([x, y]) => {
+                const rowBorder = i + x
+                const columnBorder = j + y
+
+                if (rowBorder >= 0 && rowBorder < startingRows && columnBorder >= 0 && columnBorder < startingColumns) {
+                  neighbors += grid[rowBorder][columnBorder]
+                }
+              })
+
+              if (grid[i][j] && (neighbors < 2 || neighbors > 3)) {
+                newGrid[i][j] = 0
+              } else if (grid[i][j] === 0 && neighbors === 3) {
+                newGrid[i][j] = 1
+              }
             }
           }
-        }
-        
-        return newGrid;
-      });
-  
-      setTimeout(runSimulation, 10);
-    }, []);
+          if (count === 0) {
+            setRunning(false)
+          }
+
+          setGeneration(generation => generation += 1)
+        })
+      })  
+      setTimeout(runSimulation, speedRef.current*10)
+      }, [])
+
+      const handleSpeedUp = () => {
+        setSpeed(speed => speed -= 5)
+        console.log(speed)
+      }
+
+      const handleSlowDown = () => {
+        setSpeed(speed => speed += 5)
+        console.log(speed)
+      }
+
 
 
   return (
     <MainContainer>
-      <Controls>
+        <Title>
+          <h1>Conway's Game Of Life</h1>
+        </Title>
         <Generation>
           Generation: {generation}
         </Generation>
-        <Buttons onClick={onStartHandler}>{`${running ? 'Stop' : 'Start'}`}</Buttons>
-        <Buttons onClick={() => {
+      <Controls>
+        <Button variant="info" onClick={() => {
+          setRunning(!running)
+          if (!running) {
+            runningRef.current = true
+            runSimulation()
+          }
+        }}>{`${running ? 'Stop' : 'Start'}`}</Button>
+        <Button variant="info" onClick={() => {
           setRunning(false)
           setGrid(emptyGrid(startingRows, startingColumns))
           setGeneration(0)
-        }}>Clear Grid</Buttons>
-        <Buttons onClick={() => setGrid(randomGrid(startingRows, startingColumns))}>
-          Random Grid
-        </Buttons>
+        }}>Clear Grid</Button>
+        <Button variant="info" onClick={() => {
+          const rows = []
+          for (let i = 0; i < startingRows; i++) {
+            rows.push(
+              Array.from(Array(startingColumns), () => 
+                Math.random() > 0.8 ? 1 : 0
+              )
+            )
+          }
+          setGrid(rows)
+        }}>Random Grid</Button>
+        <Button variant="info" onClick={handleSpeedUp}>Speed Up</Button>
+        <Button variant="info" onClick={handleSlowDown}>Slow Down</Button>        
+        <About />
       </Controls>
       <div>
-        <Grid grid={grid} setGrid={setGrid} onClick={onClickCellHandler} />
+
+        <Grid grid={grid} setGrid={setGrid} handleClick={handleClick} />
       </div>
     </MainContainer>
   )
