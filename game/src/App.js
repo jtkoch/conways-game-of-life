@@ -13,7 +13,7 @@ const Generation = styled.div`
   padding: 0%;
 `
 const Controls = styled.nav`
-  padding: 1%;
+  padding: 2%;
   width: 100%;
   display: flex;
   justify-content: space-around;
@@ -66,8 +66,8 @@ function App() {
   speedRef.current = speed
 
     const handleClick = (i, j) => {
-      let gridCopy = produce(grid, gridCopy => {
-        gridCopy[i][j] ? gridCopy[i][j] = 0 : gridCopy[i][j] = 1
+      let gridCopy = produce(grid, (newGrid) => {
+        newGrid[i][j] = !newGrid[i][j]
       })
       setGrid(gridCopy)
     }
@@ -78,14 +78,8 @@ function App() {
       setGrid(grid => {
         return produce(grid, (newGrid) => {
 
-          let count = 0
-
-          for (let i = 0; i < startingRows; i += 1) {
-            for (let j = 0; j < startingColumns; j += 1) {
-              
-              if (grid[i][j]) {
-                count += 1
-              }
+          for (let i = 0; i < startingRows; i++) {
+            for (let j = 0; j < startingColumns; j++) {
 
               let neighbors = 0
 
@@ -98,21 +92,17 @@ function App() {
                 }
               })
 
-              if (grid[i][j] && (neighbors < 2 || neighbors > 3)) {
+              if (neighbors < 2 || neighbors > 3) {
                 newGrid[i][j] = 0
               } else if (grid[i][j] === 0 && neighbors === 3) {
                 newGrid[i][j] = 1
               }
             }
           }
-          if (count === 0) {
-            setRunning(false)
-          }
-
           setGeneration(generation => generation += 1)
         })
       })  
-      setTimeout(runSimulation, speedRef.current*10)
+      setTimeout(runSimulation, speedRef.current*100)
       }, [])
 
       const handleSpeedUp = () => {
