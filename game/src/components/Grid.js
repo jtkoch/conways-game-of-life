@@ -13,8 +13,8 @@ const GridCell = styled.div`
     grid-row-start: auto;
     border: 1px solid black;
     cursor: pointer;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     background-color: ${({ isAlive }) => (isAlive ? '#00c9c3' : '#474747')};
 `
 
