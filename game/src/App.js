@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react'
-import produce from 'immer'
+import { produce } from 'immer'
 import Grid from './components/Grid'
 import About from './components/About'
 import styled from 'styled-components'
@@ -29,8 +29,8 @@ const MainContainer = styled.div`
 `
 
 
-const startingRows = 68
-const startingColumns = 35
+const startingRows = 40
+const startingColumns = 85
 const gridDirections = [
     [0, 1],   // right
     [0, -1],  // left
@@ -64,13 +64,6 @@ function App() {
 
   const speedRef = useRef(speed)
   speedRef.current = speed
-
-    const handleClick = (i, j) => {
-      let gridCopy = produce(grid, (newGrid) => {
-        newGrid[i][j] = !newGrid[i][j]
-      })
-      setGrid(gridCopy)
-    }
 
     const runSimulation = useCallback(() => {
       if (!runningRef.current) return
@@ -116,7 +109,6 @@ function App() {
       }
 
 
-
   return (
     <MainContainer>
         <Title>
@@ -154,8 +146,7 @@ function App() {
         <About />
       </Controls>
       <div>
-
-        <Grid grid={grid} setGrid={setGrid} handleClick={handleClick} />
+        <Grid grid={grid} setGrid={setGrid} startingColumns={startingColumns} />
       </div>
     </MainContainer>
   )

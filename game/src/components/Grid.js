@@ -1,36 +1,30 @@
 import React from 'react'
-import styled from 'styled-components'
+import { produce } from 'immer'
 
-const GridContainer = styled.div`
-    display: grid;
-    grid-gap: 1px;
-    grid-template-columns: ${({ numColumns }) => (`repeat(${numColumns}, 20px)`)};
-    padding: 0%;
-`
-
-const GridCell = styled.div`
-    grid-column-start: auto;
-    grid-row-start: auto;
-    border: 1px solid black;
-    cursor: pointer;
-    width: 20px;
-    height: 20px;
-    background-color: ${({ isAlive }) => (isAlive ? '#00c9c3' : '#474747')};
-`
-
-const Grid = ({ grid, handleClick }) => {
+const Grid = ({ grid, setGrid, startingColumns }) => {
     return (
-        <GridContainer numColumns={grid.length}>
-            {grid.map((rows, rowIndex) => (
+        <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${startingColumns}, 18px)`
+        }}>
+            {grid.map((rows, rowIndex) =>
                 rows.map((column, columnIndex) => (
-                    <GridCell
-                        isAlive={column}
-                        onClick = {() => handleClick(rowIndex, columnIndex)}
-                        key={`${rowIndex}-${columnIndex}`}
-                    />
+                    <div key={`${rowIndex}=${columnIndex}`}
+                        style={{
+                            width: 18, height: 18,
+                            backgroundColor: grid[rowIndex][columnIndex] ? '#00c9c3' : '#474747',
+                            border: "1px solid black"
+                        }}
+                        onClick={() => {
+                            const newGrid = produce(grid, gridCopy => {
+                                gridCopy[rowIndex][columnIndex] = gridCopy[rowIndex][columnIndex] ? 0 : 1
+                            })
+                            setGrid(newGrid)
+                        }}
+                    ></div>
                 ))
-            ))}
-        </GridContainer> 
+            )}
+        </div>
     )
 }
 
